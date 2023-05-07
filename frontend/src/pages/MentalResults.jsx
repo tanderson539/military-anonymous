@@ -1,4 +1,3 @@
-import React from 'react'
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Stack from 'react-bootstrap/Stack';
@@ -7,10 +6,9 @@ import './stylesheets/MentalResults.css';
 
 export default function MentalResults({score}) {
 
-
   const exportPdf = async () => {
-    window.print()
-}
+    window.print();
+  }
 
   return (
     

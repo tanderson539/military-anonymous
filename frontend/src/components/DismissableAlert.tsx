@@ -1,9 +1,11 @@
-import React from 'react';
 import Alert from 'react-bootstrap/Alert';
 
-export const DismissableAlert = ({alert, setShowAlert}) => {
-  //To use this you must pass an object to alert with an error boolean and a message string
-  //You must also pass a setShowAlert function that is a boolean to be able to click out of the alert
+interface Alert {
+  error: boolean;
+  message: string
+}
+
+export const DismissableAlert = (alert: Alert, setShowAlert: (alert: boolean) => void) => {
 
   return (
     <>

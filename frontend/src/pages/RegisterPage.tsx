@@ -1,15 +1,16 @@
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import RegisterForm from "../components/forms/RegisterForm";
 import { AppContext } from '../App';
 import { useNavigate } from 'react-router-dom'
+import { AppContextType } from "../types";
 
 
 function RegisterPage() {
   const [loginFailed] = useState(false);
   const navigate = useNavigate();
-  const { url } = useContext(AppContext);
+  const { url } = useContext(AppContext) as AppContextType;
 
-  const handleSubmit = (event) => {
+  const handleSubmit = (event:Event) => {
     event.preventDefault();
 
     const { username, password, password_confirm, full_name, branch, status, age_group, gender, isAnon} =
@@ -19,7 +20,7 @@ function RegisterPage() {
       let outArr = [];
 
       for(let i = 0; i < checkboxes.length; i++){
-        outArr.push(checkboxes[i].name);
+        outArr.push(checkboxes[i].localName);
       }
 
     if (password.value === "" || username.value === "" || password_confirm.value === "" || full_name.value === "") {

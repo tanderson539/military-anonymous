@@ -1,15 +1,13 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import "../stylesheets/NavBar.css";
 import { Navbar, Nav, Container } from "react-bootstrap";
 import { AppContext } from "../App";
 import { useNavigate } from "react-router-dom";
-
-
-
+import { AppContextType } from "../types";
 
 
 const NavBar = () => {
-  const { user, setUser, url } = useContext(AppContext);
+  const { user, setUser, url } = useContext(AppContext) as AppContextType;
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -19,12 +17,12 @@ const NavBar = () => {
     })
       .then((res) => {
         if (!res.ok) {
-          throw new Error(res.status);
+          throw new Error(res.status.toString());
         }
         return res.json();
       })
-      .then((data) => {
-        setUser({})
+      .then(() => {
+        setUser?.({publicData: {}, roles: []});
         navigate("/");
       })
       .catch((err) => console.log(err));
@@ -47,7 +45,7 @@ const NavBar = () => {
                 <h6 className="slogan w-75 mt-0 pe-4 text-end ">Connect Anonymously. Thrive Openly.</h6>
               </div>
               <Nav className="w-75 justify-content-end">
-                {user.publicData !== undefined ? <><span className="me-1">Hello, <strong>{user.publicData.is_anonymous ? user.publicData.anon_username : user.publicData.username}</strong> |</span>
+                {user?.publicData.username !== undefined ? <><span className="me-1">Hello, <strong>{user.publicData.is_anonymous ? user.publicData.anon_username : user.publicData.username}</strong> |</span>
                   <span className="navbar-links me-2" onClick={() => navigate('/chat')}>
                     Messages
                   </span>

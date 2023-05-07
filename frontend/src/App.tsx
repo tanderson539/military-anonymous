@@ -14,11 +14,10 @@ import ProfessionalRegisterPage from "./pages/ProfessionalRegisterPage";
 import MentalHealth from "./pages/MentalHealth";
 import HomePage from "./pages/HomePage";
 import NavBar from "./components/NavBar";
-import cookie from "cookie";
 import FinanceAdvanced from "./pages/FinanceAdvanced";
 import FinanceBeginner from "./pages/FinanceBeginner";
 import FinanceIntermediate from "./pages/FinanceIntermediate";
-import MentalHealthInfo from "./pages/MentalHealthInfo";
+import MentalHealthInfo from "./pages/MentalHealthInfo.tsx";
 import ProfilePage from "./pages/ProfilePage";
 import ThreadCreatePage from './pages/ThreadCreatePage';
 import Chat from "./pages/ChatPage";
@@ -29,35 +28,34 @@ import ThreadDisplayPage from "./pages/ThreadDisplayPage";
 import BodyCompForm from "./pages/BodyCompForm";
 import BmiForm from "./pages/BmiForm";
 import ThreadEditPage from "./pages/ThreadEditPage";
-import MentalResults from "./pages/MentalResults";
+//import MentalResults from "./pages/MentalResults";
+import { AppContextType, UserData } from "./types.ts";
+import cookie from "cookie";
 
-
-export const AppContext = createContext({});
+export const AppContext = createContext<AppContextType | null>(null);
 
 function App() {
-  const [user, setUser] = useState({});
-  const [url] = useState(process.env.REACT_APP_API_URL);
-  const [token, setToken] = useState();
+  const [user, setUser] = useState<UserData | null>(null);
+  const [url] = useState<string>('http://localhost:8080');
+  const [token, setToken] = useState<string>('');
 
   useEffect(() => {
     const token = cookie.parse(document.cookie).access_token;
+
     setToken(token);
-    let obj = {};
+
+    let obj: RequestInit = {
+      method: "POST",
+      credentials: "include",
+      headers: {}
+    };
 
     if (token) {
       obj = {
-        method: "POST",
-        "Access-Control-Allow-Origin": "*",
-        credentials: "include",
+        ...obj,
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      };
-    } else {
-      obj = {
-        method: "POST",
-        "Access-Control-Allow-Origin": "*",
-        credentials: "include",
       };
     }
 
@@ -66,13 +64,12 @@ function App() {
       .then((userData) => {
         setUser(userData);
       })
-      .catch(err => {
-      });
   }, [url]);
+
 
   return (
     <>
-      <AppContext.Provider value={{ user, setUser, url, token }}>
+      <AppContext.Provider value={{ user, setUser, url, token } as AppContextType}>
         <div className="App">
           <NavBar />
           <Routes>
@@ -88,7 +85,6 @@ function App() {
           <Route path='/finance/calculator' element={<FinanceCalculator />} />
           <Route path="/finance" element={<FinancePage />} />
           <Route path="/mentalhealthinfo" element={<MentalHealthInfo />}/>
-          <Route path="/mentalResults" element={<MentalResults />}/>
           <Route path="/registerpro" element={<ProfessionalRegisterPage />} />
           <Route path="/mentalhealth" element={<MentalHealth />}/>
           <Route path="/mentorship" element={<Mentorship />}/>

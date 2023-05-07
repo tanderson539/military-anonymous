@@ -12,7 +12,7 @@ const getUser = (username) => {
 };
 
 const getUserPublicInformation = (username) => {
-  return knex.select("id", "username", "email", "branch", "full_name", "age_group", "gender", "education_level", "phone_number", "about_you", "personal_goals", "is_professional", "is_anonymous", "anon_username").from("users").where({ username: username });
+  return knex.select("id", "username", "email", "branch", "full_name", "age_group", "current_status" ,"gender", "education_level", "phone_number", "about_you", "personal_goals", "is_professional", "is_anonymous", "anon_username").from("users").where({ username: username });
 }
 
 const getUserRoles = async (userID) => {

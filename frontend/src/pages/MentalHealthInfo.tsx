@@ -1,16 +1,17 @@
-import React, { useState, useContext } from "react";
+import { useState, useContext } from "react";
 import "./stylesheets/MentalHealthInfo.css";
 import { useNavigate } from "react-router-dom";
 import Alert from "react-bootstrap/Alert";
 import Button from "react-bootstrap/Button";
 import ProfessionalsTable from "../components/ProfessionalsTable";
 import { AppContext } from "../App";
+import { AppContextType } from "../types";
 
 
 function MentalHealthInfo() {
   const navigate = useNavigate();
   const [mentalHealthVisited, setMentalHealthVisited] = useState(false);
-  const { user } = useContext(AppContext);
+  const { user } = useContext(AppContext) as AppContextType;
 
   return (
     <>
@@ -100,8 +101,8 @@ function MentalHealthInfo() {
               taking care of your mental health is crucial. We're here to support
               you, and we hope you find the resources on our page helpful.
             </p>
-            {user.publicData !== undefined ? <h3>Chat with a professional</h3> : null}
-            {user.publicData !== undefined ? <ProfessionalsTable type={'Chaplain'}/> : null}
+            {user!.publicData ? <h3>Chat with a professional</h3> : null}
+            {user!.publicData !== undefined ? <ProfessionalsTable type={'Chaplain'}/> : null}
           </div>
         </div>
 

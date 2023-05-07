@@ -1,7 +1,7 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import "../stylesheets/ProfilePage.css";
 import { AppContext } from "../App";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import cookie from "cookie";
 import {
   Form,
@@ -13,18 +13,25 @@ import {
   ListGroup,
   Modal,
 } from "react-bootstrap";
-import { getOrCreateChat } from "react-chat-engine";
+import { AppContextType, UserData } from "../types";
+
+interface UserScore {
+  id: number;
+  user_id: number;
+  score: number
+  date_taken: Date
+}
 
 const ProfilePage = () => {
-  const [userData, setUserData] = useState({});
-  const [userScores, setUserScores] = useState([]);
+  const [userData, setUserData] = useState<UserData | undefined>();
+  const [userScores, setUserScores] = useState<Array<UserScore>>([]);
   const [showAboutMeModal, setShowAboutMeModal] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [aboutMeUpdate, setAboutMeUpdate] = useState("");
 
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
 
-  const { user, setUser, url, token } = useContext(AppContext);
+  const { user, setUser, url, token } = useContext(AppContext) as AppContextType;
   const { username } = useParams();
 
   const getUserData = async () => {
@@ -43,10 +50,10 @@ const ProfilePage = () => {
   };
   //If not accessing the already logged in user's profile, fetch the user's data from the database
   useEffect(() => {
-    if (user !== undefined && Object.keys(user).length !== 0) {
-      if (user.publicData.username === username) {
+    if (user !== undefined) {
+      if (user?.publicData?.username === username) {
         setUserData(user);
-        fetch(`${url}/users/scores/${user.publicData.id}`, {
+        fetch(`${url}/users/scores/${user!.publicData!.id}`, {
           method: "GET",
           credentials: "include",
           headers: {
@@ -59,8 +66,8 @@ const ProfilePage = () => {
       } else {
         getUserData()
           .then((userData) => setUserData(userData))
-          .then((data) => {
-            fetch(`${url}/users/scores/${userData.publicData.id}`)
+          .then((data:any) => {
+            fetch(`${url}/users/scores/${data?.publicData.id}`)
               .then((data) => data.json())
               .then((data) => setUserScores(data));
           });
@@ -69,9 +76,9 @@ const ProfilePage = () => {
   }, [user, username, url]);
 
   //Sets the is_anonymous value on the users profile in the database
-  const handleSwitch = async (event) => {
+  const handleSwitch = async (isAnon: boolean) => {
     const token = cookie.parse(document.cookie).access_token;
-    await fetch(`${url}/users/${user.publicData.username}`, {
+    await fetch(`${url}/users/${user!.publicData!.username}`, {
       method: "PATCH",
       credentials: "include",
       headers: {
@@ -79,46 +86,28 @@ const ProfilePage = () => {
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        is_anonymous: event.target.checked,
+        is_anonymous: isAnon
       }),
     });
     const data = await getUserData();
-    setUser(data);
+    setUser?.(data);
   };
 
-  const handleNewChat = () => {
-    const userChat = {
-      userName: user.publicData.is_anonymous
-        ? user.publicData.anon_username
-        : user.publicData.username,
-      userSecret: user.publicData.username,
-      projectID: process.env.REACT_APP_PROJ_KEY,
-    };
-    getOrCreateChat(
-      userChat,
-      {
-        is_direct_chat: true,
-        usernames: [username],
-      },
-      () => navigate("/chat")
-    );
-  };
+  // const handleDeleteUser = async () => {
+  //   await fetch(`${url}/users/${userData!.publicData!.id}`, {
+  //     method: "DELETE",
+  //     credentials: "include",
+  //     headers: {
+  //       "Content-type": "application/json; charset=UTF-8",
+  //       Authorization: `Bearer ${token}`,
+  //     },
+  //   });
 
-  const handleDeleteUser = async () => {
-    await fetch(`${url}/users/${userData.publicData.id}`, {
-      method: "DELETE",
-      credentials: "include",
-      headers: {
-        "Content-type": "application/json; charset=UTF-8",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    navigate("/");
-  };
+  //   navigate("/");
+  // };
 
   const handleAboutMeUpdate = async () => {
-    await fetch(`${url}/users/${userData.publicData.username}`, {
+    await fetch(`${url}/users/${userData!.publicData!.username}`, {
       method: "PATCH",
       credentials: "include",
       headers: {
@@ -130,7 +119,7 @@ const ProfilePage = () => {
       }),
     });
     const data = await getUserData();
-    setUser(data);
+    setUser?.(data);
     setShowAboutMeModal(false);
   };
 
@@ -138,7 +127,7 @@ const ProfilePage = () => {
     const { full_name, email, phone, branch, status, age_group } =
       document.forms[1];
 
-    await fetch(`${url}/users/${userData.publicData.username}`, {
+    await fetch(`${url}/users/${userData!.publicData!.username}`, {
       method: "PATCH",
       credentials: "include",
       headers: {
@@ -155,34 +144,29 @@ const ProfilePage = () => {
       }),
     });
     const data = await getUserData();
-    setUser(data);
+    setUser?.(data);
     setShowInfoModal(false);
   };
 
-  if (userData.publicData === undefined || user.publicData === undefined) {
+  if (userData?.publicData === undefined) {
     return <h3>Loading</h3>;
   } else {
     return (
       <>
-        {userData.publicData.is_professional
+        {userData?.publicData?.is_professional
           ? createProfessionalProfilePage(
               userData,
               user,
-              handleSwitch,
               setShowAboutMeModal,
-              handleNewChat,
               setShowInfoModal,
-              handleDeleteUser
             )
           : createRegularProfilePage(
               userData,
               user,
-              handleSwitch,
               setShowAboutMeModal,
-              userScores,
-              handleNewChat,
               setShowInfoModal,
-              handleDeleteUser
+              userScores,
+              handleSwitch
             )}
         <Modal
           show={showAboutMeModal}
@@ -215,7 +199,7 @@ const ProfilePage = () => {
           </Modal.Footer>
         </Modal>
 
-        <Modal show={showInfoModal} onHide={() => setShowInfoModal()}>
+        <Modal show={showInfoModal} onHide={() => setShowInfoModal(false)}>
           <Modal.Header closeButton>
             <Modal.Title>Edit Account Settings</Modal.Title>
           </Modal.Header>
@@ -254,7 +238,6 @@ const ProfilePage = () => {
                   <Form.Label>Military Branch</Form.Label>
                   <Form.Select
                     defaultValue={userData.publicData.branch}
-                    type="text"
                     name="branch"
                     placeholder="Military Branch"
                   >
@@ -269,8 +252,7 @@ const ProfilePage = () => {
                 <Form.Group>
                   <Form.Label>Military Status</Form.Label>
                   <Form.Select
-                    defaultValue={userData.publicData.current_status}
-                    type="text"
+                    defaultValue={userData.publicData?.current_status}
                     name="status"
                     placeholder="Military Status"
                   >
@@ -284,7 +266,6 @@ const ProfilePage = () => {
                   <Form.Label>Age Group</Form.Label>
                   <Form.Select
                     defaultValue={userData.publicData.age_group}
-                    type="text"
                     name="age_group"
                     placeholder="Age Group"
                   >
@@ -319,13 +300,10 @@ const ProfilePage = () => {
 export default ProfilePage;
 
 const createProfessionalProfilePage = (
-  userData,
-  user,
-  handleSwitch,
-  setShowModal,
-  handleNewChat,
-  setShowInfoModal,
-  handleDeleteUser
+  userData: UserData | undefined,
+  user: UserData | undefined,
+  setShowModal: (value:boolean) => void,
+  setShowInfoModal: (value:boolean) => void,
 ) => {
   return (
     <section className="profilepage-main">
@@ -339,23 +317,23 @@ const createProfessionalProfilePage = (
                   src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Windows_10_Default_Profile_Picture.svg/2048px-Windows_10_Default_Profile_Picture.svg.png"
                   alt="Profile pic"
                 />
-                <Card.Title>{userData.publicData.username}</Card.Title>
+                <Card.Title>{userData?.publicData.username}</Card.Title>
                 <Card.Text className="text-muted mb-1">
                   Military Anonymous Professional
                 </Card.Text>
                 <div className="d-flex justify-content-center mb-2">
-                  {user.publicData.username !== userData.publicData.username ? (
+                  {user?.publicData.username !== userData?.publicData.username ? (
                     <Button
                       className="m-1 btn-chat"
-                      onClick={() => handleNewChat()}
+                      onClick={() => console.log('message user here')}
                     >
                       Message Now!
                     </Button>
                   ) : null}
-                  {user.roles.includes("Admin") ? (
+                  {user?.roles.includes("Admin") ? (
                     <Button
                       className="m-1 btn-chat"
-                      onClick={() => handleDeleteUser()}
+                      onClick={() => console.log('delete user here')}
                     >
                       Delete User
                     </Button>
@@ -392,8 +370,8 @@ const createProfessionalProfilePage = (
                 <Row>
                   <div className="d-flex justify-content-between mb-2">
                     <Card.Title>User Info</Card.Title>
-                    {userData.publicData.username ===
-                    user.publicData.username ? (
+                    {userData?.publicData.username ===
+                    user?.publicData.username ? (
                       <Card.Link
                         className="clickable"
                         onClick={() => setShowInfoModal(true)}
@@ -407,9 +385,9 @@ const createProfessionalProfilePage = (
                   </Col>
                   <Col sm={9}>
                     <Card.Text className="text-muted">
-                      {userData.is_anonymous
+                      {userData?.publicData.is_anonymous
                         ? "Anonymous"
-                        : userData.publicData.full_name}
+                        : userData?.publicData.full_name}
                     </Card.Text>
                   </Col>
                 </Row>
@@ -420,10 +398,10 @@ const createProfessionalProfilePage = (
                   </Col>
                   <Col sm={9}>
                     <Card.Text className="text-muted">
-                      {userData.is_anonymous
+                      {userData?.publicData.is_anonymous
                         ? "Anonymous"
-                        : userData.publicData.email !== null
-                        ? userData.publicData.email
+                        : userData?.publicData.email !== null
+                        ? userData?.publicData.email
                         : "Not listed"}
                     </Card.Text>
                   </Col>
@@ -435,10 +413,10 @@ const createProfessionalProfilePage = (
                   </Col>
                   <Col sm={9}>
                     <Card.Text className="text-muted">
-                      {userData.is_anonymous
+                      {userData?.publicData.is_anonymous
                         ? "Anonymous"
-                        : userData.publicData.phone_number !== null
-                        ? userData.publicData.phone_number
+                        : userData?.publicData.phone_number !== null
+                        ? userData?.publicData.phone_number
                         : "None"}
                     </Card.Text>
                   </Col>
@@ -450,10 +428,10 @@ const createProfessionalProfilePage = (
                   </Col>
                   <Col sm={9}>
                     <Card.Text className="text-muted">
-                      {userData.is_anonymous
+                      {userData?.publicData.is_anonymous
                         ? "Anonymous"
-                        : userData.publicData.education_level !== null
-                        ? userData.publicData.education_level
+                        : userData?.publicData.education_level !== null
+                        ? userData?.publicData.education_level
                         : "None"}
                     </Card.Text>
                   </Col>
@@ -465,10 +443,10 @@ const createProfessionalProfilePage = (
                   </Col>
                   <Col sm={9}>
                     <Card.Text className="text-muted">
-                      {userData.is_anonymous
+                      {userData?.publicData.is_anonymous
                         ? "Anonymous"
-                        : userData.publicData.branch !== null
-                        ? userData.publicData.branch
+                        : userData?.publicData.branch !== null
+                        ? userData?.publicData.branch
                         : "None"}
                     </Card.Text>
                   </Col>
@@ -480,10 +458,10 @@ const createProfessionalProfilePage = (
                   </Col>
                   <Col sm={9}>
                     <Card.Text className="text-muted">
-                      {userData.is_anonymous
+                      {userData?.publicData.is_anonymous
                         ? "Anonymous"
-                        : userData.publicData.age_group !== null
-                        ? userData.publicData.age_group
+                        : userData?.publicData.age_group !== null
+                        ? userData?.publicData.age_group
                         : "None"}
                     </Card.Text>
                   </Col>
@@ -496,8 +474,8 @@ const createProfessionalProfilePage = (
                   <Card.Body>
                     <div className="d-flex justify-content-between mb-2">
                       <Card.Title>About Me</Card.Title>
-                      {userData.publicData.username ===
-                      user.publicData.username ? (
+                      {userData?.publicData.username ===
+                      user?.publicData.username ? (
                         <Card.Link
                           className="clickable"
                           onClick={() => setShowModal(true)}
@@ -507,10 +485,10 @@ const createProfessionalProfilePage = (
                       ) : null}
                     </div>
                     <Card.Text>
-                      {userData.is_anonymous
+                      {userData?.publicData.is_anonymous
                         ? "Anonymous"
-                        : userData.publicData.about_you !== null
-                        ? userData.publicData.about_you
+                        : userData?.publicData.about_you !== null
+                        ? userData?.publicData.about_you
                         : "None"}
                     </Card.Text>
                   </Card.Body>
@@ -520,7 +498,7 @@ const createProfessionalProfilePage = (
                 <Card className="m-4 mt-0">
                   <Card.Body>
                     <Card.Title>Specialties</Card.Title>
-                    {userData.roles.map((role) => {
+                    {userData?.roles.map((role) => {
                       return (
                         <>
                           <Card.Text>{role}</Card.Text>
@@ -542,14 +520,12 @@ const createProfessionalProfilePage = (
 //userData is the user whos profile page it is
 //user is the user accessing that information
 const createRegularProfilePage = (
-  userData,
-  user,
-  handleSwitch,
-  setShowModal,
-  userScores,
-  handleNewChat,
-  setShowInfoModal,
-  handleDeleteUser
+  userData: UserData | undefined,
+  user: UserData | undefined,
+  setShowModal: (value:boolean) => void,
+  setShowInfoModal: (value:boolean) => void,
+  userScores: Array<UserScore>,
+  handleSwitch: (e:boolean) => void,
 ) => {
   return (
     <section className="profilepage-main">
@@ -563,35 +539,35 @@ const createRegularProfilePage = (
                   src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Windows_10_Default_Profile_Picture.svg/2048px-Windows_10_Default_Profile_Picture.svg.png"
                   alt="Profile pic"
                 />
-                <Card.Title>{userData.publicData.username}</Card.Title>
+                <Card.Title>{userData?.publicData.username}</Card.Title>
                 <Card.Text className="text-muted mb-1">
                   Military Anonymous User
                 </Card.Text>
-                {userData.publicData.username === user.publicData.username ? (
+                {userData?.publicData.username === user?.publicData.username ? (
                   <Form>
                     <Form.Check
-                      onChange={(event) => handleSwitch(event)}
+                      onChange={(e)=>handleSwitch(e.target.checked)}
                       type="switch"
                       id="custom-switch"
                       label="Set anonymous"
-                      checked={userData.is_anonymous}
+                      checked={userData?.publicData.is_anonymous}
                     />
                   </Form>
                 ) : null}
                 <div className="d-flex justify-content-center mb-2">
-                  {user.publicData.username !== userData.publicData.username ? (
+                  {user?.publicData.username !== userData?.publicData.username ? (
                     <Button
                       className="m-1 btn-chat"
-                      onClick={() => handleNewChat()}
+                      onClick={() => console.log('handle new message')}
                     >
                       Message Now!
                     </Button>
                   ) : null}
 
-                  {user.roles.includes("Admin") ? (
+                  {user?.roles.includes("Admin") ? (
                     <Button
                       className="m-1 btn-chat"
-                      onClick={() => handleDeleteUser()}
+                      onClick={() => console.log('handle delete')}
                     >
                       Delete User
                     </Button>
@@ -630,8 +606,8 @@ const createRegularProfilePage = (
                 <Row>
                   <div className="d-flex justify-content-between mb-2">
                     <Card.Title>User Info</Card.Title>
-                    {userData.publicData.username ===
-                    user.publicData.username ? (
+                    {userData?.publicData.username ===
+                    user?.publicData.username ? (
                       <Card.Link
                         className="clickable"
                         onClick={() => setShowInfoModal(true)}
@@ -645,9 +621,9 @@ const createRegularProfilePage = (
                   </Col>
                   <Col sm={8}>
                     <Card.Text className="text-muted">
-                      {userData.is_anonymous
+                      {userData?.publicData.is_anonymous
                         ? "Anonymous"
-                        : userData.publicData.full_name}
+                        : userData?.publicData.full_name}
                     </Card.Text>
                   </Col>
                 </Row>
@@ -658,10 +634,10 @@ const createRegularProfilePage = (
                   </Col>
                   <Col sm={9}>
                     <Card.Text className="text-muted">
-                      {userData.is_anonymous
+                      {userData?.publicData.is_anonymous
                         ? "Anonymous"
-                        : userData.publicData.email !== null
-                        ? userData.publicData.email
+                        : userData?.publicData.email !== null
+                        ? userData?.publicData.email
                         : "Not listed"}
                     </Card.Text>
                   </Col>
@@ -673,10 +649,10 @@ const createRegularProfilePage = (
                   </Col>
                   <Col sm={9}>
                     <Card.Text className="text-muted">
-                      {userData.is_anonymous
+                      {userData?.publicData.is_anonymous
                         ? "Anonymous"
-                        : userData.publicData.phone_number !== null
-                        ? userData.publicData.phone_number
+                        : userData?.publicData.phone_number !== null
+                        ? userData?.publicData.phone_number
                         : "None"}
                     </Card.Text>
                   </Col>
@@ -688,10 +664,10 @@ const createRegularProfilePage = (
                   </Col>
                   <Col sm={9}>
                     <Card.Text className="text-muted">
-                      {userData.is_anonymous
+                      {userData?.publicData.is_anonymous
                         ? "Anonymous"
-                        : userData.publicData.education_level !== null
-                        ? userData.publicData.education_level
+                        : userData?.publicData.education_level !== null
+                        ? userData?.publicData.education_level
                         : "None"}
                     </Card.Text>
                   </Col>
@@ -703,10 +679,10 @@ const createRegularProfilePage = (
                   </Col>
                   <Col sm={9}>
                     <Card.Text className="text-muted">
-                      {userData.is_anonymous
+                      {userData?.publicData.is_anonymous
                         ? "Anonymous"
-                        : userData.publicData.branch !== null
-                        ? userData.publicData.branch
+                        : userData?.publicData.branch !== null
+                        ? userData?.publicData.branch
                         : "None"}
                     </Card.Text>
                   </Col>
@@ -718,10 +694,10 @@ const createRegularProfilePage = (
                   </Col>
                   <Col sm={9}>
                     <Card.Text className="text-muted">
-                      {userData.is_anonymous
+                      {userData?.publicData.is_anonymous
                         ? "Anonymous"
-                        : userData.publicData.age_group !== null
-                        ? userData.publicData.age_group
+                        : userData?.publicData.age_group !== null
+                        ? userData?.publicData.age_group
                         : "None"}
                     </Card.Text>
                   </Col>
@@ -734,8 +710,8 @@ const createRegularProfilePage = (
                   <Card.Body>
                     <div className="d-flex justify-content-between mb-2">
                       <Card.Title>About Me</Card.Title>
-                      {userData.publicData.username ===
-                      user.publicData.username ? (
+                      {userData?.publicData.username ===
+                      user?.publicData.username ? (
                         <Card.Link
                           className="clickable"
                           onClick={() => setShowModal(true)}
@@ -745,10 +721,10 @@ const createRegularProfilePage = (
                       ) : null}
                     </div>
                     <Card.Text>
-                      {userData.is_anonymous
+                      {userData?.publicData.is_anonymous
                         ? "Anonymous"
-                        : userData.publicData.about_you !== null
-                        ? userData.publicData.about_you
+                        : userData?.publicData.about_you !== null
+                        ? userData?.publicData.about_you
                         : "None"}
                     </Card.Text>
                   </Card.Body>
@@ -761,7 +737,7 @@ const createRegularProfilePage = (
                       <Card.Title>Personal Goals</Card.Title>
                     </div>
                     <div>
-                      {userData.publicData.personal_goals?.personal_goals.map(
+                      {userData?.publicData?.personal_goals?.map(
                         (item) => {
                           return (
                             <>

@@ -1,20 +1,21 @@
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import LoginForm from "../components/forms/LoginForm";
 import { AppContext } from '../App';
 import { useNavigate } from "react-router-dom";
 import { Spinner } from "../components/Spinner";
 import '../stylesheets/LoginPage.css'
+import { AppContextType } from "../types";
 
 function LoginPage() {
   const [loginFailed] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [alert, setAlert] = useState({});
+  const [alertObj, setAlertObj] = useState({});
 
   const navigate = useNavigate();
 
-  const {setUser, url } = useContext(AppContext);
+  const {setUser, url } = useContext(AppContext) as AppContextType;
 
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: Event) => {
     event.preventDefault();
 
     var { username, password } = document.forms[0];
@@ -41,15 +42,14 @@ function LoginPage() {
           return data.json();
         })
         .then(data => {
-          console.log(data);
           if (data.error === undefined) {
-            console.log('login successful. Setting user info.', data)
+            console.log('login successful. Setting user info.', data);
             setLoading(true);
-            setUser(data);
+            setUser?.(data);
             navigate('/');
           } else {
             setLoading(false);
-            setAlert(data);
+            setAlertObj(data);
           }
         });
     }
@@ -64,7 +64,7 @@ function LoginPage() {
             <div> is successfully logged in</div>
           ) : (
             <>
-              <LoginForm handleSubmit={handleSubmit} alert={alert} />
+              <LoginForm handleSubmit={handleSubmit} alert={alertObj} />
             </>
           )}
         </div>

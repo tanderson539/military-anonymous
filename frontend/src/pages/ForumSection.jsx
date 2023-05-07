@@ -4,7 +4,7 @@ import "./stylesheets/Forums.css";
 import { AppContext } from "../App";
 import { useNavigate } from "react-router-dom";
 
-function ForumSection({ type }) {
+function ForumSection() {
   const [threads, setThreads] = useState([]);
 
   const navigate = useNavigate();

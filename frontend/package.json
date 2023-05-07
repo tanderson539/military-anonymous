@@ -3,30 +3,33 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@syncfusion/ej2-react-documenteditor": "^21.1.38",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "@types/react-dom": "^18.2.1",
+    "@types/react-router": "^5.1.20",
+    "@types/react-router-dom": "^5.3.3",
     "@uiw/react-md-editor": "^3.20.7",
     "bootstrap": "^5.2.3",
-    "html2canvas": "^1.4.1",
-    "html2pdf": "^0.0.11",
-    "html2pdf.js": "^0.10.1",
-    "jspdf": "^2.5.1",
+    "cookie": "^0.5.0",
     "react": "^18.2.0",
     "react-bootstrap": "^2.7.2",
-    "react-chat-engine": "^1.11.28",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.10.0",
-    "react-scripts": "5.0.1",
     "recharts": "^2.5.0",
+    "typescript": "^5.0.4",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "PORT=3001 react-scripts start",
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
+  },
+  "overrides": {
+    "react-scripts": {
+      "typescript": "^5"
+    }
   },
   "eslintConfig": {
     "extends": [
@@ -45,5 +48,11 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@types/cookie": "^0.5.1",
+    "@types/node": "^18.16.3",
+    "@types/react": "^18.2.0",
+    "react-scripts": "^5.0.1"
   }
 }
