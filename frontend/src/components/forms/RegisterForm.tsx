@@ -1,8 +1,14 @@
 import { Form, Button, Row, Col } from "react-bootstrap";
-import React from "react";
+import {FC} from "react";
 import { useNavigate } from "react-router-dom";
+import { MouseEvent } from "react";
 
-function RegisterForm({ loginFailed, handleSubmit }) {
+interface Props {
+  loginFailed?: boolean;
+  handleSubmit: (e: MouseEvent<HTMLElement>)=>void;
+}
+
+const RegisterForm: FC<Props> = ({ handleSubmit }) => {
   const navigate = useNavigate();
 
   return (
@@ -48,7 +54,7 @@ function RegisterForm({ loginFailed, handleSubmit }) {
       <Row className="mb-3">
       <Form.Group as={Col}>
         <Form.Label>Military Branch</Form.Label>
-        <Form.Select type="text" name="branch" placeholder="Military Branch">
+        <Form.Select name="branch" placeholder="Military Branch">
           <option>Space Force</option>
           <option>Air Force</option>
           <option>Army</option>
@@ -59,7 +65,7 @@ function RegisterForm({ loginFailed, handleSubmit }) {
 
       <Form.Group as={Col}>
         <Form.Label>Military Status</Form.Label>
-        <Form.Select type="text" name="status" placeholder="Military Status">
+        <Form.Select name="status" placeholder="Military Status">
           <option>Active Duty</option>
           <option>Reserves</option>
           <option>Veteran</option>
@@ -71,7 +77,7 @@ function RegisterForm({ loginFailed, handleSubmit }) {
     <Row className="mb-3">
       <Form.Group as={Col}>
         <Form.Label>Age Group</Form.Label>
-        <Form.Select type="text" name="age_group" placeholder="Age Group">
+        <Form.Select name="age_group" placeholder="Age Group">
           <option>17-21</option>
           <option>22-26</option>
           <option>27-31</option>
@@ -86,7 +92,7 @@ function RegisterForm({ loginFailed, handleSubmit }) {
 
       <Form.Group as={Col}>
         <Form.Label>Gender</Form.Label>
-        <Form.Select type="text" name="gender" placeholder="Gender">
+        <Form.Select name="gender" placeholder="Gender">
           <option>Male</option>
           <option>Female</option>
           <option>Binary</option>
@@ -124,7 +130,7 @@ function RegisterForm({ loginFailed, handleSubmit }) {
       >
         Create Account
       </Button>
-      <Button variant="primary" onClick={(e) => navigate("/login")}>
+      <Button variant="primary" onClick={() => navigate("/login")}>
         Cancel
       </Button>
     </Form>

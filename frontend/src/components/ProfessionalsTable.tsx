@@ -1,12 +1,17 @@
-import React, { useEffect, useContext, useState } from 'react'
+import { useEffect, useContext, useState, FC } from 'react'
 import { Table } from 'react-bootstrap'
 import { AppContext } from '../App'
 import { useNavigate } from 'react-router-dom';
 import '../stylesheets/ProfessionalsTable.css'
+import { AppContextType, UserData } from '../types';
 
-const ProfessionalsTable = ({type}) => {
-  const { url, token } = useContext(AppContext);
-  const [professionals, setProfessionals] = useState([]);
+interface Props {
+  type: string
+}
+
+const ProfessionalsTable: FC<Props> = ({type}) => {
+  const { url, token } = useContext(AppContext) as AppContextType;
+  const [professionals, setProfessionals] = useState<Array<UserData>>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -20,9 +25,10 @@ const ProfessionalsTable = ({type}) => {
     })
       .then(res => res.json())
       .then(data => {
-        data = data.filter(professional => professional.roles.includes(type))
+        data = data.filter((professional: UserData) => professional.roles.includes(type))
         setProfessionals(data)})
   }, [])
+
   return (
     professionals.length !== 0 ? 
     <div className="professionals-main w-100">

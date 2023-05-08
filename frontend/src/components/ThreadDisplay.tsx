@@ -1,18 +1,38 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Container, Row, Col, Card, Button, Modal } from "react-bootstrap";
 import { AppContext } from "../App";
 import MDEditor from "@uiw/react-md-editor";
-import { useNavigate, useParams } from "react-router-dom";
+import { NavigateFunction, useNavigate, useParams } from "react-router-dom";
+import { AppContextType } from "../types";
+
+interface ThreadType {
+  thread_id: number;
+  thread_title: string;
+  thread_type: string;
+  thread_content: string;
+  username?: string;
+  is_anonymous: boolean;
+  thread_timestamp: Date;
+}
+
+interface CommentType {
+  comment_id?: number;
+  thread_id: number;
+  comment_content: string;
+  username: string | undefined;
+  is_anonymous?: boolean;
+  comment_timestamp?: Date;
+}
 
 function ThreadDisplay() {
-  const [comments, setComments] = useState([]);
-  const [thread, setThread] = useState();
+  const [comments, setComments] = useState<Array<CommentType>>([]);
+  const [thread, setThread] = useState<ThreadType>();
   const [value, setValue] = useState("");
   const [showModal, setShowModal] = useState(false);
 
   const { id } = useParams();
 
-  const { user, url, token } = useContext(AppContext);
+  const { user, url, token } = useContext(AppContext) as AppContextType;
 
   const navigate = useNavigate();
 
@@ -28,16 +48,15 @@ function ThreadDisplay() {
       .then((data) => setComments(data));
   }, [url, id]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = () => {
     const obj = {
-      comment_author: user.publicData.id,
-      thread_id: thread.id,
+      comment_author: user?.publicData.id,
+      thread_id: thread?.id,
       comment_content: value,
     };
 
     fetch(`${url}/comments/new`, {
       method: "POST",
-      "Access-Control-Allow-Origin": "*",
       credentials: "include",
       body: JSON.stringify(obj),
       headers: {
@@ -47,26 +66,28 @@ function ThreadDisplay() {
     })
       .then((res) => res.json())
       .then((data) => {
-        setComments([
-          ...comments,
-          {
-            comment_content: data.comment_content,
-            thread_id: data.thread_id,
-            username: user?.publicData.is_anonymous
-              ? "Anonymous"
-              : user?.publicData.username,
-            comment_timestamp: data.comment_timestamp,
-          },
-        ]);
+        addComment({
+          comment_content: data.comment_content,
+          thread_id: data.thread_id,
+          username: user?.publicData.username,
+          comment_timestamp: data.comment_timestamp,
+        });
         setValue("");
       });
   };
+
+  const addComment = (comment: CommentType) => {
+    setComments([...comments, comment]);
+  }
+
+  const handleChange = (value?: string) => {
+    setValue(value || '');
+  }
 
   const handleDelete = () => {
     console.log('deleting!')
     fetch(`${url}/threads/id/${id}`, {
       method: "DELETE",
-      "Access-Control-Allow-Origin": "*",
       credentials: "include",
       headers: {
         "Content-type": "application/json; charset=UTF-8",
@@ -88,7 +109,7 @@ function ThreadDisplay() {
               <Button
                 className="m-2 btn-chat"
                 variant="primary"
-                onClick={(e) => navigate("/forums")}
+                onClick={() => navigate("/forums")}
               >
                 Back
               </Button>
@@ -98,14 +119,14 @@ function ThreadDisplay() {
                   <Button
                     className="m-2 btn-chat"
                     variant="primary"
-                    onClick={(e) => navigate(`/threads/${thread.id}/edit`)}
+                    onClick={() => navigate(`/threads/${thread?.id}/edit`)}
                   >
                     Edit Post
                   </Button>
                   <Button
                     className="m-2 btn-chat"
                     variant="primary"
-                    onClick={(e) => setShowModal(true)}
+                    onClick={() => setShowModal(true)}
                   >
                     Delete Post
                   </Button>
@@ -114,10 +135,10 @@ function ThreadDisplay() {
                 <></>
               )}
             </Container>
-            {createThreadCard(thread, user, navigate)}
+            {createThreadCard(thread, navigate)}
             {thread ? (
               comments.map((comment) => {
-                return createCommentCard(comment, user, navigate);
+                return createCommentCard(comment, navigate);
               })
             ) : (
               <div>Loading...</div>
@@ -128,11 +149,11 @@ function ThreadDisplay() {
         <Row className="justify-content-center">
           <Col md={6} data-color-mode="light">
             <span>Post a comment:</span>
-            <MDEditor value={value} onChange={setValue} />
+            <MDEditor value={value} onChange={(value)=>handleChange(value)} />
             <Button
               variant="primary"
               className="m-2 btn-chat"
-              onClick={(e) => handleSubmit(e)}
+              onClick={() => handleSubmit()}
             >
               Submit
             </Button>
@@ -166,7 +187,7 @@ function ThreadDisplay() {
 
 export default ThreadDisplay;
 
-const createThreadCard = (thread, user, navigate) => {
+const createThreadCard = (thread: ThreadType, navigate: NavigateFunction) => {
   return (
     <Card className="m-1" key={thread?.thread_id}>
       <Card.Header>
@@ -179,7 +200,6 @@ const createThreadCard = (thread, user, navigate) => {
         <MDEditor.Markdown
           source={thread?.thread_content}
           style={{ whiteSpace: "pre-wrap" }}
-          preview="preview"
         />
       </Card.Body>
       <Card.Footer>
@@ -191,7 +211,7 @@ const createThreadCard = (thread, user, navigate) => {
   );
 };
 
-const createCommentCard = (comment, user, navigate) => {
+const createCommentCard = (comment: CommentType, navigate: NavigateFunction) => {
   return (
     <Card className="m-1" key={comment?.comment_id} onClick={()=> navigate(`/profile/${comment?.username}`)}>
       <Card.Subtitle className="m-2 text-muted clickable">

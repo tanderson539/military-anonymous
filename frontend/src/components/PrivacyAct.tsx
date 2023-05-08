@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 
@@ -9,7 +9,7 @@ function PrivacyAct() {
   const handleShow = () => setShow(true);
 
   return (
-    <div>
+    <div className="privacy-act">
       <Button variant="primary" className='my-2' onClick={handleShow}>
         View Privacy Act
       </Button>

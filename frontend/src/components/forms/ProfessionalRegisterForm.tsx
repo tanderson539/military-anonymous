@@ -1,8 +1,13 @@
 import { Form, Button, Row, Col } from "react-bootstrap";
-import React from "react";
+import {FC} from "react";
 import { useNavigate } from "react-router-dom";
+import { MouseEvent } from "react";
 
-function ProfessionalRegisterForm({ handleSubmit }) {
+interface Props {
+  handleSubmit: (e: MouseEvent<HTMLElement>) => void;
+}
+
+const ProfessionalRegisterForm: FC<Props> = ({ handleSubmit }) => {
   const navigate = useNavigate();
 
   return (
@@ -33,7 +38,7 @@ function ProfessionalRegisterForm({ handleSubmit }) {
         <Form.Control type="password" name="password" placeholder="Password" />
       </Form.Group>
 
-      <Form.Group as={Col} controlId="formBasicPassword">
+      <Form.Group as={Col} controlId="formBasicPasswordConfirm">
         <Form.Label>Confirm Password</Form.Label>
         <Form.Control
           type="password"
@@ -56,7 +61,7 @@ function ProfessionalRegisterForm({ handleSubmit }) {
 
       <Form.Group as={Col}>
         <Form.Label>Military Branch</Form.Label>
-        <Form.Select type="text" name="branch" placeholder="Military Branch">
+        <Form.Select name="branch" placeholder="Military Branch">
           <option>Space Force</option>
           <option>Air Force</option>
           <option>Army</option>
@@ -69,7 +74,7 @@ function ProfessionalRegisterForm({ handleSubmit }) {
       
       <Form.Group className="mb-3">
         <Form.Label>Gender</Form.Label>
-        <Form.Select type="text" name="gender" placeholder="Gender">
+        <Form.Select name="gender" placeholder="Gender">
           <option>Male</option>
           <option>Female</option>
           <option>Binary</option>
@@ -98,7 +103,7 @@ function ProfessionalRegisterForm({ handleSubmit }) {
       >
         Create Account
       </Button>
-      <Button variant="primary" onClick={(e) => navigate("/login")}>
+      <Button variant="primary" onClick={() => navigate("/login")}>
         Cancel
       </Button>
     </Form>

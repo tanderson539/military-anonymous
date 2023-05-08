@@ -27,3 +27,8 @@ export interface AppContextType {
   url?:string;
   token?:string;
 }
+
+export interface AlertType {
+  error: boolean;
+  message: string
+}

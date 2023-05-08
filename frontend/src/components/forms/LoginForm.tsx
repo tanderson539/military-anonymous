@@ -1,10 +1,17 @@
 import { Form, Button } from "react-bootstrap";
-import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { FC, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import PrivacyAct from "../PrivacyAct";
 import { DismissableAlert } from "../DismissableAlert";
+import { AlertType } from "../../types";
+import { MouseEvent } from "react";
 
-function LoginForm({ handleSubmit, alert }) {
+interface Props {
+  handleSubmit: (e: MouseEvent<HTMLElement>) => void;
+  alert: AlertType;
+}
+
+const LoginForm: FC<Props> = ( {handleSubmit, alert} ) => {
   const navigate = useNavigate();
   const [showAlert, setShowAlert] = useState(false);
 
@@ -35,15 +42,15 @@ function LoginForm({ handleSubmit, alert }) {
         Submit
       </Button>
 
-      <Button variant="primary" onClick={(e) => navigate('/register')}>
+      <Button variant="primary" onClick={() => navigate('/register')}>
         Register
       </Button>
 
-      <Button variant="primary" className="my-2 ms-2" onClick={(e) => navigate('/registerpro')}>
+      <Button variant="primary" className="my-2 ms-2" onClick={() => navigate('/registerpro')}>
         Register as Specialist
       </Button>
 
-      <PrivacyAct className="privacy-act"/>
+      <PrivacyAct />
     </Form>
   );
 }

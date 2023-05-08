@@ -5,17 +5,18 @@ import { useNavigate } from "react-router-dom";
 import { Spinner } from "../components/Spinner";
 import '../stylesheets/LoginPage.css'
 import { AppContextType } from "../types";
+import { MouseEvent } from "react";
 
 function LoginPage() {
   const [loginFailed] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [alertObj, setAlertObj] = useState({});
+  const [alertObj, setAlertObj] = useState({error: false, message: ''});
 
   const navigate = useNavigate();
 
   const {setUser, url } = useContext(AppContext) as AppContextType;
 
-  const handleSubmit = (event: Event) => {
+  const handleSubmit = (event: MouseEvent<HTMLElement>) => {
     event.preventDefault();
 
     var { username, password } = document.forms[0];

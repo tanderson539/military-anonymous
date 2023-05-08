@@ -1,11 +1,13 @@
 import Alert from 'react-bootstrap/Alert';
+import {AlertType} from '../types';
+import { FC } from 'react';
 
-interface Alert {
-  error: boolean;
-  message: string
+interface Props {
+  alert: AlertType;
+  setShowAlert: (alert: boolean) => void;
 }
 
-export const DismissableAlert = (alert: Alert, setShowAlert: (alert: boolean) => void) => {
+export const DismissableAlert: FC<Props> = ({alert, setShowAlert}) => {
 
   return (
     <>

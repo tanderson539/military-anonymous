@@ -1,10 +1,11 @@
 import ProfessionalPrivacyAgreement from '../components/forms/ProfessionalPrivacyAgreement';
 import { useNavigate } from 'react-router-dom';
+import { MouseEvent } from 'react';
 
 function ProfessionalPrivacyAgreementPage() {
     const navigate = useNavigate();
 
-    const handleSubmit = (event) => {
+    const handleSubmit = (event: MouseEvent<HTMLElement>) => {
         event.preventDefault();
 
         const { printed_name, supporting_docs_attachments } =

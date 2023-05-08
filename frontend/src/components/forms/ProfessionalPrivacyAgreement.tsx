@@ -1,21 +1,26 @@
 import { Form, Button } from "react-bootstrap";
-import React from "react";
+import { FC } from "react";
 import { useNavigate } from "react-router-dom";
+import { MouseEvent } from "react";
 
-function ProfessionalPrivacyAgreement({ handleSubmit }) {
+interface Props {
+    handleSubmit: (e: MouseEvent<HTMLElement>)=> void;
+}
+
+const ProfessionalPrivacyAgreement: FC<Props> = ({ handleSubmit }) => {
     const navigate = useNavigate();
     // const supportingDocs = [];
 
-    const handleUpload = (e) => {
-        // Below conditional goes through uploaded files and adds them to supportingDocs array above
-        // Not sure if we'll need to validate these for now, but adding just in case
-        // if (e.target.files) {
-        //     for (let i = 0 ; i < e.target.files.length ; i++ ) {
-        //         let file = e.target.files[i];
-        //         supportingDocs.push(file);
-        //     }            
-        // }
-    }
+    // const handleUpload = (e) => {
+    //     // Below conditional goes through uploaded files and adds them to supportingDocs array above
+    //     // Not sure if we'll need to validate these for now, but adding just in case
+    //     if (e.target.files) {
+    //         for (let i = 0 ; i < e.target.files.length ; i++ ) {
+    //             let file = e.target.files[i];
+    //             supportingDocs.push(file);
+    //         }            
+    //     }
+    // }
 
     return (
         <Form>
@@ -50,7 +55,6 @@ function ProfessionalPrivacyAgreement({ handleSubmit }) {
                     type="file"
                     multiple
                     name="supporting_docs_attachments"
-                    onChange={handleUpload}
                 />
             </Form.Group>
 
@@ -61,7 +65,7 @@ function ProfessionalPrivacyAgreement({ handleSubmit }) {
             >
                 Create Account
             </Button>
-            <Button variant="primary" onClick={(e) => navigate("/login")}>
+            <Button variant="primary" onClick={() => navigate("/login")}>
                 Cancel
             </Button>
         </Form>

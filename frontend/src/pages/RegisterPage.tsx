@@ -3,6 +3,7 @@ import RegisterForm from "../components/forms/RegisterForm";
 import { AppContext } from '../App';
 import { useNavigate } from 'react-router-dom'
 import { AppContextType } from "../types";
+import { MouseEvent } from "react";
 
 
 function RegisterPage() {
@@ -10,7 +11,7 @@ function RegisterPage() {
   const navigate = useNavigate();
   const { url } = useContext(AppContext) as AppContextType;
 
-  const handleSubmit = (event:Event) => {
+  const handleSubmit = (event:MouseEvent<HTMLElement>) => {
     event.preventDefault();
 
     const { username, password, password_confirm, full_name, branch, status, age_group, gender, isAnon} =
